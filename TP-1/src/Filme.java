@@ -62,7 +62,7 @@ public class Filme {
     public String getPais() { return pais; }
     public void setPais(String pais) { this.pais = formatarPais(pais); }
 
-    // Método para converter o objeto em vetor de bytes
+    // metodo para converter o objeto em vetor de bytes
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
