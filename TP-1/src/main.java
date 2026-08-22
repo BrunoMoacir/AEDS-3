@@ -20,8 +20,8 @@ public class main {
 
             if (opcao == 1) {
                 System.out.println("\nIniciando carga de dados...");
-                // Chama o importador passando o caminho relativo da pasta dados
-                ImportadorCSV.processarArquivo("dados/imdb_movies.csv");
+                // Passa o caminho do CSV e onde o arquivo binário deve ser gerado
+                ImportadorCSV.processarArquivo("dados/imdb_movies.csv", "dados/dados.bin");
             } else if (opcao == 0) {
                 System.out.println("Saindo do sistema...");
             } else {

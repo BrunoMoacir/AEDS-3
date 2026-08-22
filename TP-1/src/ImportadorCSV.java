@@ -4,40 +4,43 @@ import java.util.Calendar;
 
 public class ImportadorCSV {
 
-    public static void processarArquivo(String caminhoArquivo) {
+    public static void processarArquivo(String caminhoCSV, String caminhoBinario) {
         int contadorId = 1;
+        
+        // Prepara o arquivo binário
+        ArquivoBinario arqBin = new ArquivoBinario(caminhoBinario);
+        arqBin.inicializar();
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(caminhoArquivo));
+            BufferedReader br = new BufferedReader(new FileReader(caminhoCSV));
             String linha = br.readLine(); // Pula o cabeçalho
             linha = br.readLine();
 
-            // Lê apenas as 10 primeiras linhas para teste inicial
-            while (linha != null && contadorId <= 10) {
+            System.out.println("Lendo o CSV e gravando no arquivo binário...");
+
+            // Vamos importar todos os registros agora (removi a limitação de 10 linhas)
+            while (linha != null) {
                 String[] campos = separarColunasCSV(linha);
                 
-                // Mapeamento das colunas com base na imagem do dataset imdb_movies.csv
                 String nome = campos[0];
                 long dataLancamento = converterDataManual(campos[1]);
-                
                 float score = 0.0f;
                 if (campos[2].length() > 0) {
                     score = Float.parseFloat(campos[2]);
                 }
-                
                 String[] generos = separarGenerosManual(campos[3]);
-                
-                // O país está na coluna 11 (última na sua imagem)
                 String pais = campos[11];
 
                 Filme filme = new Filme(contadorId, nome, dataLancamento, score, generos, pais);
-                System.out.println(filme.toString());
+                
+                // Grava fisicamente no arquivo .bin
+                arqBin.inserir(filme);
                 
                 contadorId++;
                 linha = br.readLine();
             }
             br.close();
-            System.out.println("\nTeste de leitura concluído com sucesso!");
+            System.out.println("Carga da base de dados concluída com sucesso! " + (contadorId - 1) + " registros gravados.");
             
         } catch (Exception e) {
             System.out.println("Erro ao ler o arquivo: " + e.getMessage());

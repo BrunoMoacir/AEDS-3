@@ -43,7 +43,24 @@ public class Filme {
         return formatado;
     }
 
-    // --- GETTERS E SETTERS OMITIDOS AQUI PARA BREVIDADE (Crie-os conforme a necessidade) ---
+    // --- GETTERS E SETTERS ---
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+    
+    public long getDataLancamento() { return dataLancamento; }
+    public void setDataLancamento(long dataLancamento) { this.dataLancamento = dataLancamento; }
+    
+    public float getScore() { return score; }
+    public void setScore(float score) { this.score = score; }
+    
+    public String[] getGeneros() { return generos; }
+    public void setGeneros(String[] generos) { this.generos = generos; }
+    
+    public String getPais() { return pais; }
+    public void setPais(String pais) { this.pais = formatarPais(pais); }
 
     // Método para converter o objeto em vetor de bytes
     public byte[] toByteArray() throws IOException {
