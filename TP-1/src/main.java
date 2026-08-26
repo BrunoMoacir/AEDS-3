@@ -75,9 +75,19 @@ public class main {
                         String novoScoreStr = scanner.nextLine();
                         if (novoScoreStr.length() > 0) filmeExistente.setScore(Float.parseFloat(novoScoreStr));
                         
-                        System.out.print("Gêneros atuais - Digite separados por vírgula: ");
+                        // --- CORREÇÃO: Formatando e mostrando os gêneros atuais ---
+                        String strGen = "[";
+                        String[] genAtuais = filmeExistente.getGeneros();
+                        for (int i = 0; i < genAtuais.length; i++) {
+                            strGen += genAtuais[i];
+                            if (i < genAtuais.length - 1) strGen += ", ";
+                        }
+                        strGen += "]";
+                        
+                        System.out.print("Gêneros atuais " + strGen + " - Digite separados por vírgula: ");
                         String novosGeneros = scanner.nextLine();
                         if (novosGeneros.length() > 0) filmeExistente.setGeneros(ImportadorCSV.separarGenerosManual(novosGeneros));
+                        // -----------------------------------------------------------
                         
                         System.out.print("País atual (" + filmeExistente.getPais() + ") - Sigla de 2 letras: ");
                         String novoPais = scanner.nextLine();
@@ -86,6 +96,8 @@ public class main {
                         boolean sucesso = arqBin.atualizar(filmeExistente);
                         if (sucesso) {
                             System.out.println("\nFilme atualizado com sucesso no arquivo binário!");
+                            // --- CORREÇÃO: Mostrando como o registro ficou ---
+                            System.out.println("Como ficou: " + filmeExistente.toString());
                         }
                     } else {
                         System.out.println("\nFilme não encontrado para atualização.");
