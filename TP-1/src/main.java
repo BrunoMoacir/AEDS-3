@@ -38,31 +38,52 @@ public class main {
             } 
             else if (opcao == 3) {
                 System.out.print("\nDigite o ID do filme que deseja atualizar: ");
-                int idAtualiza = scanner.nextInt();
-                scanner.nextLine(); // Limpa o buffer do teclado
+                String idStr = scanner.nextLine(); // Usar nextLine e converter evita bugs no buffer
                 
-                ArquivoBinario arqBin = new ArquivoBinario("dados/dados.bin");
-                Filme filmeExistente = arqBin.ler(idAtualiza);
-                
-                if (filmeExistente != null) {
-                    System.out.println("\nFilme atual: " + filmeExistente.getNome() + " | Score: " + filmeExistente.getScore());
+                try {
+                    int idAtualiza = Integer.parseInt(idStr);
+                    ArquivoBinario arqBin = new ArquivoBinario("dados/dados.bin");
+                    Filme filmeExistente = arqBin.ler(idAtualiza);
                     
-                    System.out.print("Digite o NOVO nome (ou aperte Enter para manter): ");
-                    String novoNome = scanner.nextLine();
-                    if (!novoNome.isEmpty()) {
-                        filmeExistente.setNome(novoNome);
+                    if (filmeExistente != null) {
+                        System.out.println("\n--- Atualizando Filme (ID " + idAtualiza + ") ---");
+                        System.out.println("Deixe em branco e aperte Enter para manter o valor atual.");
+                        
+                        // 1. NOME
+                        System.out.print("Nome atual (" + filmeExistente.getNome() + "): ");
+                        String novoNome = scanner.nextLine();
+                        if (novoNome.length() > 0) filmeExistente.setNome(novoNome);
+                        
+                        // 2. DATA
+                        System.out.print("Data atual (" + filmeExistente.getDataLancamento() + " ms) - Digite no formato MM/DD/YYYY: ");
+                        String novaData = scanner.nextLine();
+                        if (novaData.length() > 0) filmeExistente.setDataLancamento(ImportadorCSV.converterDataManual(novaData));
+                        
+                        // 3. SCORE
+                        System.out.print("Score atual (" + filmeExistente.getScore() + "): ");
+                        String novoScoreStr = scanner.nextLine();
+                        if (novoScoreStr.length() > 0) filmeExistente.setScore(Float.parseFloat(novoScoreStr));
+                        
+                        // 4. GÊNEROS
+                        System.out.print("Gêneros atuais - Digite separados por vírgula: ");
+                        String novosGeneros = scanner.nextLine();
+                        if (novosGeneros.length() > 0) filmeExistente.setGeneros(ImportadorCSV.separarGenerosManual(novosGeneros));
+                        
+                        // 5. PAÍS
+                        System.out.print("País atual (" + filmeExistente.getPais() + ") - Sigla de 2 letras: ");
+                        String novoPais = scanner.nextLine();
+                        if (novoPais.length() > 0) filmeExistente.setPais(novoPais);
+                        
+                        // Salva no arquivo
+                        boolean sucesso = arqBin.atualizar(filmeExistente);
+                        if (sucesso) {
+                            System.out.println("\nFilme atualizado com sucesso no arquivo binário!");
+                        }
+                    } else {
+                        System.out.println("\nFilme não encontrado para atualização.");
                     }
-                    
-                    System.out.print("Digite o NOVO score (use vírgula, ex: 85,5): ");
-                    float novoScore = scanner.nextFloat();
-                    filmeExistente.setScore(novoScore);
-                    
-                    boolean sucesso = arqBin.atualizar(filmeExistente);
-                    if (sucesso) {
-                        System.out.println("\nFilme atualizado com sucesso no arquivo binário!");
-                    }
-                } else {
-                    System.out.println("\nFilme não encontrado para atualização.");
+                } catch (NumberFormatException e) {
+                    System.out.println("\nErro: Digite um ID numérico válido.");
                 }
             }
             else if (opcao == 4) {

@@ -84,7 +84,7 @@ public class ImportadorCSV {
     }
 
     // Separa a string "Drama, Action" num array, ignorando os espaços após a vírgula
-    private static String[] separarGenerosManual(String bruta) {
+    public static String[] separarGenerosManual(String bruta) {
         int qtd = 1;
         for (int i = 0; i < bruta.length(); i++) {
             if (bruta.charAt(i) == ',') qtd++;
@@ -112,7 +112,7 @@ public class ImportadorCSV {
     }
 
     // Converte a string MM/DD/YYYY para um long de milissegundos lidando com espaços manuais
-    private static long converterDataManual(String dataStr) {
+    public static long converterDataManual(String dataStr) {
         if (dataStr.length() == 0) return 0;
         
         String mesStr = "";
