@@ -50,4 +50,79 @@ public class ArquivoBinario {
             System.out.println("Erro ao inserir registro: " + e.getMessage());
         }
     }
+
+    // Método para Ler um registro pelo ID
+    public Filme ler(int idBuscado) {
+        try {
+            RandomAccessFile raf = new RandomAccessFile(this.nomeArquivo, "r");
+            
+            // Pula o cabeçalho (os primeiros 4 bytes do int)
+            raf.seek(4);
+
+            // Varre o arquivo até o final
+            while (raf.getFilePointer() < raf.length()) {
+                byte lapide = raf.readByte();
+                int tamanho = raf.readInt();
+                
+                // Lê o vetor de bytes do registro
+                byte[] ba = new byte[tamanho];
+                raf.read(ba);
+
+                // Se a lápide for um espaço (' '), o registro é válido
+                if (lapide == ' ') {
+                    Filme filme = new Filme();
+                    filme.fromByteArray(ba); // Converte os bytes de volta para o objeto
+                    
+                    // Verifica se é o ID que estamos procurando
+                    if (filme.getId() == idBuscado) {
+                        raf.close();
+                        return filme; // Retorna o filme encontrado
+                    }
+                }
+            }
+            raf.close();
+        } catch (IOException e) {
+            System.out.println("Erro ao ler registro: " + e.getMessage());
+        }
+        return null; // Retorna nulo se não encontrar o ID ou se estiver deletado
+    }
+
+    // Método para Deletar (logicamente) um registro pelo ID
+    public boolean deletar(int idBuscado) {
+        try {
+            RandomAccessFile raf = new RandomAccessFile(this.nomeArquivo, "rw");
+            
+            raf.seek(4); // Pula o cabeçalho
+
+            while (raf.getFilePointer() < raf.length()) {
+                long posicaoLapide = raf.getFilePointer(); // Guarda a posição exata da lápide
+                
+                byte lapide = raf.readByte();
+                int tamanho = raf.readInt();
+                
+                byte[] ba = new byte[tamanho];
+                raf.read(ba);
+
+                if (lapide == ' ') {
+                    Filme filme = new Filme();
+                    filme.fromByteArray(ba);
+                    
+                    if (filme.getId() == idBuscado) {
+                        // Volta o ponteiro para a posição da lápide desse registro
+                        raf.seek(posicaoLapide);
+                        
+                        // Escreve '*' para marcar como deletado
+                        raf.writeByte('*'); 
+                        
+                        raf.close();
+                        return true; // Deletado com sucesso
+                    }
+                }
+            }
+            raf.close();
+        } catch (IOException e) {
+            System.out.println("Erro ao deletar registro: " + e.getMessage());
+        }
+        return false; // Retorna falso se não encontrar
+    }
 }
