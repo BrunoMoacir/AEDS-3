@@ -13,6 +13,7 @@ public class main {
             System.out.println("2. Ler um Registro (CRUD)");
             System.out.println("3. Atualizar um Registro (CRUD)");
             System.out.println("4. Deletar um Registro (CRUD)");
+            System.out.println("5. Ordenação Externa");
             System.out.println("0. Sair");
             System.out.print("Escolha uma opcao: ");
             
@@ -122,6 +123,22 @@ public class main {
                 } catch (NumberFormatException e) {
                     System.out.println("\nErro: ID inválido.");
                 }
+            }
+            else if (opcao == 5) {
+                System.out.println("\n--- Ordenação Externa ---");
+                System.out.print("Digite o número de caminhos (arquivos temporários, ex: 2 ou 3): ");
+                int caminhos = Integer.parseInt(scanner.nextLine());
+                
+                System.out.print("Digite o limite de registros em memória primária (ex: 1000): ");
+                int registrosMemoria = Integer.parseInt(scanner.nextLine());
+                
+                OrdenacaoExterna ordenacao = new OrdenacaoExterna("dados/dados.bin", caminhos, registrosMemoria);
+                
+                System.out.println("Iniciando Fase 1: Distribuição (e limpeza de excluídos)...");
+                int totalArquivos = ordenacao.distribuir();
+                
+                System.out.println("Distribuição concluída! " + totalArquivos + " arquivos temporários gerados.");
+                System.out.println("(A Fase de Intercalação será implementada no próximo passo)");
             }
             else if (opcao == 0) {
                 System.out.println("\nSaindo do sistema...");
