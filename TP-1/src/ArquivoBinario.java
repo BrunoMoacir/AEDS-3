@@ -125,4 +125,54 @@ public class ArquivoBinario {
         }
         return false; // Retorna falso se não encontrar
     }
+
+    // Método para Atualizar um registro
+    public boolean atualizar(Filme filmeAtualizado) {
+        try {
+            RandomAccessFile raf = new RandomAccessFile(this.nomeArquivo, "rw");
+            raf.seek(4); // Pula o cabeçalho
+
+            while (raf.getFilePointer() < raf.length()) {
+                long posicaoLapide = raf.getFilePointer(); // Guarda o início do registro
+                
+                byte lapide = raf.readByte();
+                int tamanhoAntigo = raf.readInt();
+                
+                byte[] ba = new byte[tamanhoAntigo];
+                raf.read(ba);
+
+                if (lapide == ' ') {
+                    Filme filme = new Filme();
+                    filme.fromByteArray(ba);
+                    
+                    // Se encontrou o ID que queremos atualizar
+                    if (filme.getId() == filmeAtualizado.getId()) {
+                        byte[] novoBa = filmeAtualizado.toByteArray();
+                        
+                        // CÁLCULO DE TAMANHO
+                        if (novoBa.length <= tamanhoAntigo) {
+                            // Cenário 1: Cabe no mesmo lugar. Volta o ponteiro para depois da Lápide e do Tamanho
+                            raf.seek(posicaoLapide + 5); 
+                            raf.write(novoBa);
+                        } else {
+                            // Cenário 2: Aumentou de tamanho. Deleta o antigo e insere no final.
+                            raf.seek(posicaoLapide);
+                            raf.writeByte('*'); // Lápide de exclusão no antigo
+                            
+                            raf.seek(raf.length()); // Vai para o fim do arquivo
+                            raf.writeByte(' '); // Nova Lápide válida
+                            raf.writeInt(novoBa.length); // Novo tamanho
+                            raf.write(novoBa); // Novos dados
+                        }
+                        raf.close();
+                        return true;
+                    }
+                }
+            }
+            raf.close();
+        } catch (IOException e) {
+            System.out.println("Erro ao atualizar registro: " + e.getMessage());
+        }
+        return false;
+    }
 }

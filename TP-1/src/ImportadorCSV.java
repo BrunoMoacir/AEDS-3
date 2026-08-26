@@ -1,10 +1,17 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.File;
 import java.util.Calendar;
 
 public class ImportadorCSV {
 
     public static void processarArquivo(String caminhoCSV, String caminhoBinario) {
+
+        File arquivo = new File(caminhoBinario);
+        if (arquivo.exists()) {
+            arquivo.delete();
+        }
+
         int contadorId = 1;
         
         // Prepara o arquivo binário
