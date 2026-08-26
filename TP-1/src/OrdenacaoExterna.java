@@ -106,4 +106,119 @@ public class OrdenacaoExterna {
             System.out.println("Erro ao gravar arquivo temporário: " + e.getMessage());
         }
     }
+
+    // FASE 2: Intercalação (Merge dos caminhos)
+    public void intercalar() {
+        try {
+            // Arrays para controlar os arquivos e o registro atual de cada um
+            RandomAccessFile[] arquivosTemp = new RandomAccessFile[this.caminhos];
+            Filme[] filmesAtuais = new Filme[this.caminhos];
+            boolean[] fimDeArquivo = new boolean[this.caminhos];
+            int maxId = 0;
+
+            // 1. Abre os arquivos temporários e lê o primeiro registro de cada
+            for (int i = 0; i < this.caminhos; i++) {
+                String nomeArquivo = "dados/temp_0_" + i + ".bin";
+                File file = new File(nomeArquivo);
+                
+                if (file.exists()) {
+                    arquivosTemp[i] = new RandomAccessFile(nomeArquivo, "r");
+                    filmesAtuais[i] = lerProximoFilme(arquivosTemp[i]);
+                    if (filmesAtuais[i] == null) {
+                        fimDeArquivo[i] = true; // Arquivo já estava vazio
+                    }
+                } else {
+                    fimDeArquivo[i] = true; // Arquivo não existe
+                }
+            }
+
+            // 2. Prepara o NOVO arquivo principal limpo
+            String nomeNovoArquivo = "dados/dados_ordenado.bin";
+            File novoFile = new File(nomeNovoArquivo);
+            if (novoFile.exists()) novoFile.delete();
+            
+            RandomAccessFile rafNovo = new RandomAccessFile(nomeNovoArquivo, "rw");
+            rafNovo.writeInt(0); // Escreve um cabeçalho temporário
+
+            // 3. Laço principal da Intercalação (encontra o menor ID entre os arquivos)
+            while (true) {
+                int indiceMenor = -1;
+                int menorId = Integer.MAX_VALUE;
+
+                // Varre o array buscando quem tem o menor ID na rodada atual
+                for (int i = 0; i < this.caminhos; i++) {
+                    if (!fimDeArquivo[i] && filmesAtuais[i] != null) {
+                        if (filmesAtuais[i].getId() < menorId) {
+                            menorId = filmesAtuais[i].getId();
+                            indiceMenor = i;
+                        }
+                    }
+                }
+
+                // Se não achou nenhum, todos os arquivos temporários chegaram ao fim
+                if (indiceMenor == -1) {
+                    break; 
+                }
+
+                // 4. Grava o vencedor (menor ID) no arquivo novo
+                Filme filmeGravar = filmesAtuais[indiceMenor];
+                byte[] ba = filmeGravar.toByteArray();
+                
+                rafNovo.writeByte(' '); // Lápide de registro válido
+                rafNovo.writeInt(ba.length);
+                rafNovo.write(ba);
+                
+                // Mantém o controle do maior ID do sistema para o cabeçalho
+                if (filmeGravar.getId() > maxId) {
+                    maxId = filmeGravar.getId();
+                }
+
+                // 5. Avança a leitura apenas no arquivo que venceu a disputa
+                filmesAtuais[indiceMenor] = lerProximoFilme(arquivosTemp[indiceMenor]);
+                if (filmesAtuais[indiceMenor] == null) {
+                    fimDeArquivo[indiceMenor] = true;
+                }
+            }
+
+            // 6. Atualiza o cabeçalho definitivo e fecha o arquivo novo
+            rafNovo.seek(0);
+            rafNovo.writeInt(maxId);
+            rafNovo.close();
+
+            // 7. Limpeza da pasta (Fecha os temporários e deleta tudo que não serve mais)
+            for (int i = 0; i < this.caminhos; i++) {
+                if (arquivosTemp[i] != null) {
+                    arquivosTemp[i].close();
+                    File f = new File("dados/temp_0_" + i + ".bin");
+                    f.delete();
+                }
+            }
+            
+            // Substitui o arquivo original desordenado pelo novo ordenado
+            File arquivoAntigo = new File(this.arquivoOriginal);
+            if (arquivoAntigo.exists()) arquivoAntigo.delete();
+            novoFile.renameTo(arquivoAntigo);
+
+        } catch (IOException e) {
+            System.out.println("Erro na fase de intercalação: " + e.getMessage());
+        }
+    }
+
+    // Método auxiliar para avançar a leitura dentro de um arquivo temporário
+    private Filme lerProximoFilme(RandomAccessFile tempRaf) throws IOException {
+        while (tempRaf.getFilePointer() < tempRaf.length()) {
+            byte lapide = tempRaf.readByte();
+            int tamanho = tempRaf.readInt();
+            byte[] ba = new byte[tamanho];
+            tempRaf.read(ba);
+
+            if (lapide == ' ') {
+                Filme filme = new Filme();
+                filme.fromByteArray(ba);
+                return filme;
+            }
+        }
+        return null;
+    }
+    
 }

@@ -129,16 +129,19 @@ public class main {
                 System.out.print("Digite o número de caminhos (arquivos temporários, ex: 2 ou 3): ");
                 int caminhos = Integer.parseInt(scanner.nextLine());
                 
-                System.out.print("Digite o limite de registros em memória primária (ex: 1000): ");
+                System.out.print("Digite o limite de registros em memória primária (ex: 20000): ");
                 int registrosMemoria = Integer.parseInt(scanner.nextLine());
                 
                 OrdenacaoExterna ordenacao = new OrdenacaoExterna("dados/dados.bin", caminhos, registrosMemoria);
                 
-                System.out.println("Iniciando Fase 1: Distribuição (e limpeza de excluídos)...");
+                System.out.println("Iniciando Fase 1: Distribuição (limpando excluídos e ordenando)...");
                 int totalArquivos = ordenacao.distribuir();
-                
                 System.out.println("Distribuição concluída! " + totalArquivos + " arquivos temporários gerados.");
-                System.out.println("(A Fase de Intercalação será implementada no próximo passo)");
+                
+                System.out.println("Iniciando Fase 2: Intercalação (Merge dos caminhos)...");
+                ordenacao.intercalar();
+                System.out.println("\nOrdenação Externa concluída com sucesso!");
+                System.out.println("O arquivo 'dados.bin' agora está limpo e 100% ordenado.");
             }
             else if (opcao == 0) {
                 System.out.println("\nSaindo do sistema...");
